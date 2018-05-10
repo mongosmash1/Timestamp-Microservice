@@ -9,10 +9,10 @@
     "start": "node server.js"
   },
   "engines": {
-    "node": "4.4.5"
+    "node": "10.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mongosmash1/Timestamp-Microservice.git"
+    "url": "https://github.com/mongosmash1/timestamp-microservice.git"
   }
 }

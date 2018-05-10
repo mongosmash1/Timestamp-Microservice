@@ -11,8 +11,9 @@ app.route('/')
     res.sendFile(process.cwd() + '/views/index.html');
   })
 
-// this work for natural to unix,
+// this works for natural to unix conversion,
 // but is not working for unix to natural
+// do I need to divide unix time by 1000
 
 // checks whether valid date and returns a json string
 app.route('/api/timestamp/:timeVar')
