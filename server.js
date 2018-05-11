@@ -2,43 +2,53 @@
 
 const express = require('express');
 const app = express();
+const port = process.env.PORT;
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
-//s erves static file by default containing instructions to use this microservice
+// serves static file by default containing instructions to use this microservice
 app.route('/')
   .get(function(req, res) {
     res.sendFile(process.cwd() + '/views/index.html');
   })
 
-// this works for natural to unix conversion,
-// but is not working for unix to natural
-// do I need to divide unix time by 1000
-
-// checks whether valid date and returns a json string
+// timestamp microservice
 app.route('/api/timestamp/:timeVar')
   .get(function(req, res) {
-    let date = new Date(req.params.timeVar);
-    // options for local date string format
-    let options = { month: 'long', day: 'numeric', year: 'numeric'};
-    // converts to date to seconds since Jan 01 1970 (divide by 1000 since JS defaults to milliseconds)
-    let unixTime = Date.parse(date);
-    let natTime = date.toLocaleDateString('en-US', options);
-    // verifies a valid date was requested  
-    if (isNaN(parseInt(unixTime))) {
-      unixTime = null;
-      natTime = null;
+    let date = req.params.timeVar;
+    let options = { month: 'long', day: 'numeric', year: 'numeric'}; // options for displaying natural time
+    let unixTime = null;
+    let natTime = null;
+    
+    // first checks if a string was passed as a parameter
+    if (isNaN(date)) {
+      date = new Date(date);
+      // then checks that a valid date was actually passed before setting time variables
+      if (date.getTime() >= 0 && date.getTime() <= Date.now()) {
+        natTime = date.toLocaleDateString('en-US', options);
+        unixTime = date.getTime() / 1000;
+      }
     }
+    // otherwise checks if a number was passed as a parameter and sets time variable
+    else if (date >= 0) {
+      date = new Date(date * 1000);
+      // then checks that a valid date was actually passed before setting time variables
+      if (date.getTime() >= 0 && date.getTime() <= Date.now()) {
+        natTime = date.toLocaleDateString('en-US', options);
+        unixTime = date.getTime() / 1000;
+      }
+    }
+    
     res.json({ unix: unixTime, natural: natTime });
   })
 
-// Respond not found to all the wrong routes
+// respond not found for all invalid routes
 app.use(function(req, res, next){
   res.status(404);
   res.type('txt').send('Not found');
 });
 
-// Error Middleware
+// error handling for middleware
 app.use(function(err, req, res, next) {
   if(err) {
     res.status(err.status || 500)
@@ -47,7 +57,7 @@ app.use(function(err, req, res, next) {
   }  
 })
 
-app.listen(process.env.PORT, function () {
+app.listen(port, function () {
   console.log('Node.js listening ...');
 });
 
